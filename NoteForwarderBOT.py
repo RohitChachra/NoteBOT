@@ -44,6 +44,142 @@ file_dict = {
         "Workshop": {
             "Lab File": [56, 57, 58],
         }
+    },
+    "2nd Sem": {
+        "Differential Equations": {
+            "Books": [73, 74],
+            "Notes": [77, 78, 79, 76],
+            "Assignments": [81, 82, 83, 84, 85, 86, 87, 88, 89]
+        },
+        "OOPS using C++": {
+            "Books": [],
+            "Notes": [91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103],
+            "PYQs": [105],
+            "Assignments": [107, 108, 109],
+            "Practical File": [111]
+        },
+        "Chemistry": {
+            "Book Notes": [115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126],
+            "Notes": [127, 128, 129, 130, 131],
+            "PYQs": [132],
+            "Assignment": [134],
+            "Practical Manual":[136]
+        },
+        "Professional Communication": {
+            "Book Notes": [138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 149, 150, 151, 152],
+            "Handwritten Notes": [173, 174, 175, 176, 177],
+            "PPTs": [159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171]
+        },
+        "BITC": {
+            "Notes": [179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 188, 189, 190, 191],
+            "Practical File": [196],
+            "Assignment": [193, 194]
+        },
+        "Web Development": {
+            "Practical File": [198]
+        }
+    },
+    "3rd Sem": {
+        "Data Structures": {
+            "Books": [201, 202],
+            "Notes": [204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214],
+            "PYQs": [313],
+            "DSA Lab Files":[216, 217],
+            "Tutorials": [219, 220, 221, 222, 223]
+        },
+        "Linear Algebra & Probability": {
+            "Books": [225, 226],
+            "Notes": [228, 229, 230, 231, 232, 233, 234],
+            "PYQs": [313],
+            "Assignments": [235]
+        },
+        "Digital Electronics": {
+            "Notes": [237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251],
+            "PYQs": [313],
+            "Practical File":[253],
+            "Tutorials": [258, 259, 260, 261, 262, 263, 264, 265, 266, 267],
+            "Assignments": [255, 256]
+        },
+        "DBMS": {
+            "Books": [269],
+            "Notes": [271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292],
+            "PYQs": [313],
+            "Assignments": [294],
+            "Practical File": [296]
+        },
+        "Computer Architecture": {
+            "Books": [298],
+            "Notes": [300, 301, 302, 303],
+            "PYQs": [313],
+            "Tutorials": [305, 306, 307, 308, 309, 310]
+        }
+    },
+    "4th Sem": {
+        "Computer Networks": {
+            "Notes": [319, 320, 321, 322],
+            "PYQs": [326],
+            "Practical File":[],
+            "Assignments": [324]
+        },
+        "Discrete Structures": {
+            "Books": [328, 329, 330, 331],
+            "Notes": [333, 334, 335, 336, 337, 338, 339, 340, 341, 342, 343, 344],
+            "PYQs": [347],
+            "Assignments": [345]
+        },
+        "Operating system": {
+            "Books": [349, 350, 351],
+            "Notes": [353, 354, 355, 356],
+            "PYQs": [361],
+            "Lab File":[358, 359]
+        },
+        "Microprocessor": {
+            "Books": [371],
+            "Notes": [373, 374, 375, 376, 377],
+            "PYQs": [382],
+            "Practical File": [379, 380]
+        },
+        "Economics": {
+            "Books": [363],
+            "Notes": [365, 366],
+            "PYQs": [368]
+        }
+    },
+    "5th Sem": {
+        "Design & Analysis of Algorithms": {
+            "Books": [388],
+            "Notes": [390, 391, 392, 393],
+            "PYQs": [400, 401, 402],
+            "Practical File":[398],
+            "Assignments": [395, 396]
+        },
+        "Artificial Intelligence": {
+            "Books": [405, 406, 407],
+            "Notes": [409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419],
+            "PYQs": [425, 426, 427, 428],
+            "Assignments": [421],
+            "Practical File":[423]
+        },
+        "Python": {
+            "Books": [431],
+            "Notes": [433, 434, 435, 436],
+            "PYQs": [444, 445, 446, 447, 448],
+            "Practical File":[441],
+            "Assignments": [438, 439]
+        },
+        "Network Security": {
+            "Books": [451, 452],
+            "Notes": [454, 455, 456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468],
+            "PYQs": [484, 485, 486, 487, 488, 489, 490],
+            "Practical File": [472],
+            "Assignments": [470],
+            "Tutorials": [474, 475, 476, 477, 478, 479, 480, 481, 482]
+        },
+        "Cyber laws & IPR": {
+            "Notes": [493, 494, 495],
+            "PYQs": [500, 501, 502],
+            "Assignments": [497, 498]
+        }
     }
 }
 
