@@ -3,6 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, MenuBut
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from dotenv import load_dotenv
 import os
+import asyncio
 from flask import Flask
 
 load_dotenv()
@@ -314,7 +315,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "💡 Need more help? Request to join our channel:\nhttps://t.me/+J8zLk2dQb301OGE1"
     )
 
-def main():
+async def run_bot():
     application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('help', help_command))
@@ -325,8 +326,8 @@ def main():
     application.add_handler(CallbackQueryHandler(back_to_semesters, pattern="^back:semesters$"))
     application.add_handler(CallbackQueryHandler(back_to_subjects, pattern="^back:subjects$"))
 
-    # ✅ Use asyncio to ensure concurrent updates
-    application.run_polling()
+    # ✅ Run bot using asyncio
+    await application.run_polling()
 
 
 app = Flask(__name__)
@@ -337,6 +338,9 @@ def home():
 
 
 if __name__ == '__main__':
-    main()
+    # ✅ Start the bot using asyncio
+    asyncio.get_event_loop().create_task(run_bot())
+
+    # ✅ Run Flask on the main thread
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
