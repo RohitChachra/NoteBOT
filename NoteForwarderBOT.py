@@ -3,7 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, MenuBut
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from dotenv import load_dotenv
 import os
-import asyncio
+import threading
 from flask import Flask
 
 load_dotenv()
@@ -315,8 +315,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "💡 Need more help? Request to join our channel:\nhttps://t.me/+J8zLk2dQb301OGE1"
     )
 
-async def run_bot():
+def run_bot():
     application = Application.builder().token(BOT_TOKEN).build()
+
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CallbackQueryHandler(send_scheme_syllabus, pattern="^scheme_syllabus$"))
@@ -326,8 +327,8 @@ async def run_bot():
     application.add_handler(CallbackQueryHandler(back_to_semesters, pattern="^back:semesters$"))
     application.add_handler(CallbackQueryHandler(back_to_subjects, pattern="^back:subjects$"))
 
-    # ✅ Run bot using asyncio
-    await application.run_polling()
+    print("Bot is starting...")
+    application.run_polling()
 
 
 app = Flask(__name__)
@@ -336,11 +337,13 @@ app = Flask(__name__)
 def home():
     return "Bot is running!"
 
-
-if __name__ == '__main__':
-    # ✅ Start the bot using asyncio
-    asyncio.get_event_loop().create_task(run_bot())
-
-    # ✅ Run Flask on the main thread
+def run_flask():
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
+if __name__ == '__main__':
+    # Start Flask in a separate thread
+    flask_thread = threading.Thread(target=run_flask, daemon=True)
+    flask_thread.start()
+
+    run_bot()  # Runs bot concurrently with Flask
