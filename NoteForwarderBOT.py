@@ -3,6 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, MenuBut
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from dotenv import load_dotenv
 import os
+from flask import Flask
 
 load_dotenv()
 # Enable logging
@@ -323,7 +324,19 @@ def main():
     application.add_handler(CallbackQueryHandler(send_resource, pattern="^res:"))
     application.add_handler(CallbackQueryHandler(back_to_semesters, pattern="^back:semesters$"))
     application.add_handler(CallbackQueryHandler(back_to_subjects, pattern="^back:subjects$"))
+
+    # ✅ Use asyncio to ensure concurrent updates
     application.run_polling()
+
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot is running!"
+
 
 if __name__ == '__main__':
     main()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
