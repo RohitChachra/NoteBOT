@@ -114,6 +114,10 @@ file_dict = {
             "Notes": [300, 301, 302, 303],
             "PYQs": [313],
             "Tutorials": [305, 306, 307, 308, 309, 310]
+        },
+        "Minors & Majors": {
+            "Minors": [314],
+            "Majors": [313]
         }
     },
     "4th Sem": {
