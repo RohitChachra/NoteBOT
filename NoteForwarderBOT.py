@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import os
 import threading
 from flask import Flask
+import sqlite3
+import html
 
 load_dotenv()
 # Enable logging
@@ -14,6 +16,25 @@ logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 # Replace with your channel's chat ID (must be negative)
 CHANNEL_ID = os.getenv("CHANNEL_ID")
+
+ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
+
+def init_db():
+    conn = sqlite3.connect("bot_users.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            chat_id INTEGER UNIQUE,
+            first_name TEXT,
+            username TEXT,
+            phone_number TEXT
+        )
+    """)
+    
+    conn.commit()
+    conn.close()
 
 # File dictionary with Telegram file IDs instead of local paths
 file_dict = {
@@ -191,10 +212,30 @@ file_dict = {
 
 # Start command handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    chat_id = update.message.chat_id
+    first_name = user.first_name
+    username = user.username or "Unknown"
+
+    # Store user in SQLite
+    conn = sqlite3.connect("bot_users.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM users WHERE chat_id = ?", (chat_id,))
+    result = cursor.fetchone()
+
+    if result is None:
+        cursor.execute("INSERT INTO users (chat_id, first_name, username) VALUES (?, ?, ?)",
+                       (chat_id, first_name, username))
+        conn.commit()
+
+    conn.close()
+
     await update.message.reply_text(
-        f"👋 Hello {update.effective_user.first_name}!\n"
-        "📚 I provide notes, assignments, books, lab files, and PYQs for all subjects semester-wise for the **BE-IT** curriculum.\n"
-        "📌 **Select your semester or view the scheme & syllabus:**",
+        f"\U0001F44B Hello {update.effective_user.first_name}!\n"
+        "\U0001F4DA I provide notes, assignments, books, lab files, and PYQs for all subjects semester-wise for the <b>BE-IT</b> curriculum.\n"
+        "\U0001F4CC <b>Select your semester or view the scheme & syllabus:</b>",
+        parse_mode="HTML",
         reply_markup=semester_keyboard()
     )
     await context.bot.set_my_commands([("start", "Start the bot"), ("help", "View help instructions")])
@@ -225,7 +266,8 @@ async def send_scheme_syllabus(update: Update, context: ContextTypes.DEFAULT_TYP
 
     await context.bot.send_message(
         chat_id=query.message.chat_id,
-        text="🏠 Send **/start** to return to the main menu."
+        text="\U0001F3E0 Send <b>/start</b> to return to the main menu.",
+        parse_mode="HTML"
     )
 
 
@@ -236,7 +278,8 @@ async def semester_selection(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data["semester"] = semester
 
     await query.edit_message_text(
-        text=f"📚 **Choose a subject from {semester}:**",
+        text=f"\U0001F4DA <b>Choose a subject from {semester}:</b>",
+        parse_mode="HTML",
         reply_markup=subject_keyboard(semester)
     )
 
@@ -253,7 +296,8 @@ async def subject_selection(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     context.user_data["subject"] = subject
 
     await query.edit_message_text(
-        text=f"📂 **Select the resource type for {subject}:**",
+        text=f"\U0001F4C2 <b>Select the resource type for {subject}:</b>",
+        parse_mode="HTML",
         reply_markup=resource_keyboard(context.user_data["semester"], subject)
     )
 
@@ -275,12 +319,16 @@ async def send_resource(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     if not message_ids:
         await query.edit_message_text(
-            text=f"⚠️ **No {resource_type} available for {subject}.**\n"
-                 "I'll ask my creator to upload the required materials. 📤"
+            text=f"\u26A0 <b>No {resource_type} available for {subject}.</b>\n"
+                 "I'll ask my creator to upload the required materials. \U0001F4E4",
+            parse_mode="HTML"
         )
         return
 
-    await query.edit_message_text(text=f"🔍 Fetching your files from the UIET IT channel... Please wait ⏳")
+    await query.edit_message_text(
+        text="\U0001F50D Fetching your files from the UIET IT channel... Please wait ⏳",
+        parse_mode="HTML"
+    )
 
     for message_id in message_ids:
         await context.bot.forward_message(
@@ -291,39 +339,92 @@ async def send_resource(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     await context.bot.send_message(
         chat_id=query.message.chat_id,
-        text="✅ **All requested files have been forwarded successfully!**\n"
-             "🏠 Send **/start** to return to the main menu."
+        text="✅ <b>All requested files have been forwarded successfully!</b>\n"
+             "\U0001F3E0 Send <b>/start</b> to return to the main menu.",
+        parse_mode="HTML"
     )
 
 
 async def back_to_semesters(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text("📌 **Select your semester:**", reply_markup=semester_keyboard())
+    await query.edit_message_text("\U0001F4CC <b>Select your semester:</b>", parse_mode="HTML", reply_markup=semester_keyboard())
 
 async def back_to_subjects(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
     semester = context.user_data.get("semester")
-    await query.edit_message_text(f"📚 **Choose a subject from {semester}:**", reply_markup=subject_keyboard(semester))
+    await query.edit_message_text(f"\U0001F4DA <b>Choose a subject from {semester}:</b>", parse_mode="HTML", reply_markup=subject_keyboard(semester))
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "❓ **Help Section** ❓\n\n"
-        "📌 **How to use this bot?**\n"
-        "1️⃣ Start with `/start`\n"
-        "2️⃣ Select your **semester**\n"
-        "3️⃣ Select the **subject**\n"
-        "4️⃣ Choose the **resource type** (Books, Notes, PYQs, etc.)\n"
-        "5️⃣ Bot will send the required files 📂\n\n"
-        "💡 Need more help? Request to join our channel:\nhttps://t.me/+J8zLk2dQb301OGE1"
+        "\u2753 <b>Help Section</b> \u2753\n\n"
+        "\U0001F4CC <b>How to use this bot?</b>\n"
+        "1️⃣ Start with <b>/start</b>\n"
+        "2️⃣ Select your <b>semester</b>\n"
+        "3️⃣ Select the <b>subject</b>\n"
+        "4️⃣ Choose the <b>resource type</b> (Books, Notes, PYQs, etc.)\n"
+        "5️⃣ Bot will send the required files \U0001F4C2\n\n"
+        "💡 Need more help? Request to join our channel:\n<a href='https://t.me/+J8zLk2dQb301OGE1'>Click here</a>",
+        parse_mode="HTML"
     )
 
-def run_bot():
-    application = Application.builder().token(BOT_TOKEN).build()
+async def user_count(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.chat_id != ADMIN_CHAT_ID:
+        await update.message.reply_text("❌ You are not authorized to use this command.")
+        return
 
+    conn = sqlite3.connect("bot_users.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM users")
+    user_count = cursor.fetchone()[0]
+
+    conn.close()
+
+    await update.message.reply_text(f"📊 <b>Total Users: {user_count}</b>", parse_mode="HTML")
+
+async def user_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.chat_id != ADMIN_CHAT_ID:
+        await update.message.reply_text("❌ You are not authorized to use this command.")
+        return
+
+    # Connect to SQLite database
+    conn = sqlite3.connect("bot_users.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT first_name, username, chat_id FROM users")
+    users = cursor.fetchall()
+    conn.close()
+
+    user_count = len(users)
+
+    if not users:
+        message = "No users found."
+    else:
+        def escape_html(text):
+            """Escape special characters for Telegram HTML formatting"""
+            return html.escape(text)
+
+        user_list = "\n".join([
+            f"🔹 <b>{escape_html(first_name)}</b> (@{escape_html(username)}) - <code>{chat_id}</code>" 
+            if username else 
+            f"🔹 <b>{escape_html(first_name)}</b> - <code>{chat_id}</code>"
+            for first_name, username, chat_id in users
+        ])
+        
+        message = f"📊 <b>Total Unique Users:</b> <b>{user_count}</b>\n\n{user_list}"
+
+    await update.message.reply_text(message, parse_mode="HTML")
+
+
+
+def run_bot():
+    init_db()
+    application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('help', help_command))
+    application.add_handler(CommandHandler("user_count", user_count))  # Admin-only command
+    application.add_handler(CommandHandler("user_list", user_list))  # Admin-only command
     application.add_handler(CallbackQueryHandler(send_scheme_syllabus, pattern="^scheme_syllabus$"))
     application.add_handler(CallbackQueryHandler(semester_selection, pattern="^sem:"))
     application.add_handler(CallbackQueryHandler(subject_selection, pattern="^subj:"))
@@ -349,5 +450,5 @@ if __name__ == '__main__':
     # Start Flask in a separate thread
     flask_thread = threading.Thread(target=run_flask, daemon=True)
     flask_thread.start()
-
+    
     run_bot()  # Runs bot concurrently with Flask
