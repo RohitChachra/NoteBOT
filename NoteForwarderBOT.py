@@ -207,6 +207,43 @@ file_dict = {
             "PYQs": [500, 501, 502],
             "Assignments": [497, 498]
         }
+    },
+    "6th Sem": {
+        "Deep Learning": {
+            "Books": [530, 531],
+            "Notes": [533, 534, 535, 536, 537, 538, 539, 540, 541],
+            "PYQs": [546, 547, 548, 549, 550],
+            "Assignments": [543, 544],
+        },
+        "Machine Learning": {
+            "ML Syllabus": [553],
+            "Books": [555, 556],
+            "Notes": [569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579],
+            "PYQs": [581, 582, 583, 584, 585],
+            "Lab Programs":[587, 588, 589, 590, 591, 592, 593, 594, 595, 596]
+        },
+        "Software Engineering": {
+            "Books": [599, 600],
+            "Notes": [602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612],
+            "PYQs": [619, 620, 621, 622, 623],
+            "Assignments": [614, 615, 616, 617]
+        },
+        "Software Project management": {
+            "Books": [626],
+            "Notes": [628, 629, 630, 631, 632, 633, 634, 635, 636, 637, 638, 639, 640],
+            "PYQs": [644, 645, 646],
+            "Assignment": [642],
+        },
+        "Theory of Computation": {
+            "Books": [649],
+            "Notes": [651, 652, 653, 654, 655],
+            "PYQs": [657, 658, 659, 660, 661, 662, 663, 664, 665, 666, 667, 668, 669, 670, 671, 672, 673, 674],
+            "Tutorials": [676, 677, 678, 679, 680, 681],
+        },
+        "Environmental Science": {
+            "Notes": [684, 685],
+            "PYQs": [687, 688],
+        }
     }
 }
 
@@ -238,7 +275,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         parse_mode="HTML",
         reply_markup=semester_keyboard()
     )
-    await context.bot.set_my_commands([("start", "Start the bot"), ("help", "View help instructions")])
+    await context.bot.set_my_commands([
+        ("start", "Start the bot"),
+        ("help", "View help instructions"),
+        ("web_dev", "Access Web Dev (MERN) Course")
+    ])
     await context.bot.set_chat_menu_button(update.message.chat_id, MenuButtonCommands())
 
 def semester_keyboard():
@@ -248,7 +289,8 @@ def semester_keyboard():
         [InlineKeyboardButton("📗 IT 2nd Sem", callback_data="sem:2nd Sem")],
         [InlineKeyboardButton("📘 IT 3rd Sem", callback_data="sem:3rd Sem")],
         [InlineKeyboardButton("📙 IT 4th Sem", callback_data="sem:4th Sem")],
-        [InlineKeyboardButton("📔 IT 5th Sem", callback_data="sem:5th Sem")]
+        [InlineKeyboardButton("📔 IT 5th Sem", callback_data="sem:5th Sem")],
+        [InlineKeyboardButton("📓 IT 6th Sem", callback_data="sem:6th Sem")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -365,7 +407,28 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "3️⃣ Select the <b>subject</b>\n"
         "4️⃣ Choose the <b>resource type</b> (Books, Notes, PYQs, etc.)\n"
         "5️⃣ Bot will send the required files \U0001F4C2\n\n"
-        "💡 Need more help? Request to join our channel:\n<a href='https://t.me/+J8zLk2dQb301OGE1'>Click here</a>",
+        "💡 <b>Available Commands:</b>\n"
+        "🔹 <b>/start</b> – Restart the bot & show semester options\n"
+        "🔹 <b>/help</b> – Show how to use the bot\n"
+        "🔹 <b>/web_dev</b> – Get free access to Premium Web Dev MERN Stack Course\n\n"
+        "📢 Join our official channel:\n"
+        "👉 <b><a href='https://t.me/+J8zLk2dQb301OGE1'>UIET IT Study Material</a></b>\n",
+        parse_mode="HTML"
+    )
+
+async def web_dev_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(
+        "Exciting News for All Aspiring Web Developers!\n"
+        "🚀💡\n\n"
+        "A complete access to Premium Web Development MERN Stack Course!!!\n\n"
+        "This course includes:\n"
+        "✅ Full video lectures\n"
+        "✅ Cheat sheets, notes & PDFs\n"
+        "✅ Code ZIP files\n"
+        "✅ Projects and real-world practice\n"
+        "✅ Covers Git, HTML, CSS, JS, React, Node.js, MongoDB, Express, Next.js, Authentication & Authorization — from basics to advanced!\n\n"
+        "📢 Request to Join the channel to freely access the Web Dev (MERN) Course:\n"
+        "👉 <b><a href='https://t.me/+bdXSonKRluY5N2Nl'>WEB DEV Course</a></b>\n",
         parse_mode="HTML"
     )
 
@@ -423,6 +486,7 @@ def run_bot():
     application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('help', help_command))
+    application.add_handler(CommandHandler("web_dev", web_dev_command))
     application.add_handler(CommandHandler("user_count", user_count))  # Admin-only command
     application.add_handler(CommandHandler("user_list", user_list))  # Admin-only command
     application.add_handler(CallbackQueryHandler(send_scheme_syllabus, pattern="^scheme_syllabus$"))
