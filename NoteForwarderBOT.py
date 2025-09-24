@@ -212,7 +212,7 @@ file_dict = {
         "Deep Learning": {
             "Books": [530, 531],
             "Notes": [533, 534, 535, 536, 537, 538, 539, 540, 541],
-            "PYQs": [546, 547, 548, 549, 550],
+            "PYQs": [546, 547, 551, 549, 550],
             "Assignments": [543, 544],
         },
         "Machine Learning": {
@@ -502,9 +502,13 @@ def run_bot():
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return "Bot is running!"
+# Import UI Blueprints
+from botUI import botUI
+from quiz import quiz
+
+# Register Blueprints
+app.register_blueprint(botUI)
+app.register_blueprint(quiz)
 
 def run_flask():
     port = int(os.environ.get("PORT", 5000))
@@ -514,5 +518,5 @@ if __name__ == '__main__':
     # Start Flask in a separate thread
     flask_thread = threading.Thread(target=run_flask, daemon=True)
     flask_thread.start()
-    
+
     run_bot()  # Runs bot concurrently with Flask
