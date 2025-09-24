@@ -414,6 +414,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "🔹 <b>/start</b> – Restart the bot & show semester options\n"
         "🔹 <b>/help</b> – Show how to use the bot\n"
         "🔹 <b>/web_dev</b> – Get free access to Premium Web Dev MERN Stack Course\n\n"
+        "🔗 For more info, visit our website:\n"
+        "👉 <b>https://it-notebot.onrender.com</b>\n\n"
         "📢 Join our official channel:\n"
         "👉 <b><a href='https://t.me/+J8zLk2dQb301OGE1'>UIET IT Study Material</a></b>\n",
         parse_mode="HTML"
