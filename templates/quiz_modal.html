@@ -1,0 +1,51 @@
+<!-- START QUIZ CONFIRMATION MODAL -->
+<div class="modal fade modal-custom" id="startQuizModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Ready to Start Quiz?</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="mb-2">Please review your quiz settings before starting:</p>
+
+        <ul class="list-group mb-3">
+          <li class="list-group-item">
+            <b>Topic:</b> <span id="modal-topic"></span>
+          </li>
+          <li class="list-group-item">
+            <b>Number of Questions:</b> <span id="modal-num-questions"></span>
+          </li>
+          <li class="list-group-item">
+            <b>Difficulty:</b> <span id="modal-difficulty"></span>
+          </li>
+          <li class="list-group-item">
+            <b>Navigation Mode:</b> <span id="modal-navigation"></span>
+          </li>
+          <li class="list-group-item">
+            <b>Timer Mode:</b> <span id="modal-timer-mode"></span>
+          </li>
+          <li class="list-group-item" id="modal-timer-value-box">
+            <b>Timer Value:</b> <span id="modal-timer-value"></span>
+          </li>
+        </ul>
+
+        <h6 class="fw-bold">📘 Rules</h6>
+        <ul>
+          <li><b>Sequential mode:</b> You cannot revisit previous questions.</li>
+          <li><b>Free navigation:</b> Jump to any question anytime.</li>
+          <li><b>Timer:</b> Auto-submits when time ends.</li>
+          <li>No negative marking.</li>
+          <li>Each question has exactly one correct answer.</li>
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="modal-start-btn" class="btn btn-primary">Start Now ▶️</button>
+      </div>
+    </div>
+  </div>
+</div>

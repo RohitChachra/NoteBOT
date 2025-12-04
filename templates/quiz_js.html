@@ -1,0 +1,619 @@
+
+<script>
+const quizState = {
+  questions: [],
+  answers: [],
+  currentIndex: 0,
+  navigationMode: "sequential",
+  timerMode: "per_question",
+  perQuestionSeconds: 30,
+  totalTimeSeconds: 0,
+  remainingSeconds: 0,
+  timerId: null
+};
+
+// Temporary storage for settings selected on the form
+let pendingSettings = null;
+
+// Bootstrap modal instance (for confirmation)
+let startQuizModal = null;
+
+// ========== Helper: Initialize Tooltips ==========
+function initTooltips() {
+  const tooltipTriggerList = [].slice.call(
+    document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  );
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+}
+
+// ========== Helper: Timer Mode Toggle (per question vs total) ==========
+function initTimerModeToggle() {
+  const perQRadio = document.getElementById("timer-per-question");
+  const totalRadio = document.getElementById("timer-total");
+  const perQSettings = document.getElementById("per-question-settings");
+  const totalSettings = document.getElementById("total-time-settings");
+
+  function refreshTimerUI() {
+    const navMode = document.querySelector('input[name="navigationMode"]:checked').value;
+
+    if (navMode === "free") {
+      // Free navigation → only total quiz timer
+      perQRadio.disabled = true;
+      perQRadio.checked = false;
+      perQSettings.style.display = "none";
+
+      totalRadio.disabled = false;
+      totalRadio.checked = true;
+      totalSettings.style.display = "block";
+    } else {
+      // Sequential → both options available
+      perQRadio.disabled = false;
+      totalRadio.disabled = false;
+
+      if (perQRadio.checked) {
+        perQSettings.style.display = "block";
+        totalSettings.style.display = "none";
+      } else if (totalRadio.checked) {
+        perQSettings.style.display = "none";
+        totalSettings.style.display = "block";
+      } else {
+        // default if none checked
+        perQRadio.checked = true;
+        perQSettings.style.display = "block";
+        totalSettings.style.display = "none";
+      }
+    }
+  }
+
+  perQRadio.addEventListener("change", refreshTimerUI);
+  totalRadio.addEventListener("change", refreshTimerUI);
+
+  // Also react when navigation mode changes
+  const navSeq = document.getElementById("nav-seq");
+  const navFree = document.getElementById("nav-free");
+  navSeq.addEventListener("change", refreshTimerUI);
+  navFree.addEventListener("change", refreshTimerUI);
+
+  // Initial state
+  refreshTimerUI();
+}
+
+// ========== Helper: Start Global Timer ==========
+function clearTimer() {
+  if (quizState.timerId) {
+    clearInterval(quizState.timerId);
+    quizState.timerId = null;
+  }
+}
+
+// Total-quiz timer
+function startTotalTimer() {
+  clearTimer();
+  if (quizState.totalTimeSeconds <= 0) {
+    document.getElementById("timer").textContent = "";
+    return;
+  }
+
+  quizState.remainingSeconds = quizState.totalTimeSeconds;
+  const timerEl = document.getElementById("timer");
+
+  function renderTimer() {
+    const s = quizState.remainingSeconds;
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    timerEl.textContent = `⏱ ${mins}m ${secs.toString().padStart(2, "0")}s remaining`;
+  }
+
+  renderTimer();
+
+  quizState.timerId = setInterval(() => {
+    quizState.remainingSeconds -= 1;
+    if (quizState.remainingSeconds <= 0) {
+      clearTimer();
+      timerEl.textContent = "⏱ Time up!";
+      finishQuiz(true); // auto finish
+    } else {
+      renderTimer();
+    }
+  }, 1000);
+}
+
+// Per-question timer
+function startPerQuestionTimer() {
+  clearTimer();
+  const timerEl = document.getElementById("timer");
+  quizState.remainingSeconds = quizState.perQuestionSeconds;
+
+  function renderTimer() {
+    const s = quizState.remainingSeconds;
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    if (quizState.perQuestionSeconds >= 60) {
+      timerEl.textContent = `⏱ ${mins}m ${secs.toString().padStart(2, "0")}s for this question`;
+    } else {
+      timerEl.textContent = `⏱ ${secs}s for this question`;
+    }
+  }
+
+  renderTimer();
+
+  quizState.timerId = setInterval(() => {
+    quizState.remainingSeconds -= 1;
+    if (quizState.remainingSeconds <= 0) {
+      clearTimer();
+      // Time up for this question → next question or finish
+      if (quizState.currentIndex < quizState.questions.length - 1) {
+        quizState.currentIndex += 1;
+        renderCurrentQuestion();
+        startPerQuestionTimer();  // restart timer for next Q
+      } else {
+        finishQuiz(true);        // auto-finish on last Q
+      }
+    } else {
+      renderTimer();
+    }
+  }, 1000);
+}
+
+// ========== Update Question nav==========
+function updateQuestionNavButtons() {
+  const questionNav = document.getElementById("question-nav");
+  if (!questionNav) return;
+
+  const buttons = questionNav.querySelectorAll("button");
+
+  buttons.forEach((btn, idx) => {
+    const answered = quizState.answers[idx] != null;
+    const isCurrent = idx === quizState.currentIndex;
+
+    // Reset classes
+    btn.classList.remove("btn-outline-primary", "btn-primary", "btn-success");
+
+    if (answered) {
+      // Answered → green
+      btn.classList.add("btn-success");
+    } else {
+      // Unanswered → blue outline
+      btn.classList.add("btn-outline-primary");
+    }
+
+    // Highlight current question border (blue filled if still unanswered)
+    if (isCurrent && !answered) {
+      btn.classList.remove("btn-outline-primary");
+      btn.classList.add("btn-primary");
+    }
+  });
+}
+
+
+// ========== Render One Question ==========
+function renderCurrentQuestion() {
+  const qIndex = quizState.currentIndex;
+  const questions = quizState.questions;
+  if (!questions || questions.length === 0) return;
+
+  const question = questions[qIndex];
+
+  // Counter
+  const counterEl = document.getElementById("question-counter");
+  counterEl.textContent = `Question ${qIndex + 1} of ${questions.length}`;
+
+  // Text
+  document.getElementById("question-text").textContent = question.question;
+
+  // Options
+  const optionsDiv = document.getElementById("options-container");
+  optionsDiv.innerHTML = "";
+
+  question.options.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "btn btn-outline-primary w-100 option-btn";
+    btn.textContent = opt;
+
+    if (quizState.answers[qIndex] === idx) {
+      btn.classList.add("option-selected");
+    }
+
+    btn.addEventListener("click", () => {
+      quizState.answers[qIndex] = idx;
+      renderCurrentQuestion(); // re-render to update selection state
+    });
+
+    optionsDiv.appendChild(btn);
+  });
+
+  // Navigation logic
+  const prevBtn = document.getElementById("prev-btn");
+  const nextBtn = document.getElementById("next-btn");
+  const questionNav = document.getElementById("question-nav");
+
+  if (quizState.navigationMode === "sequential") {
+    prevBtn.style.display = "none";
+    questionNav.style.display = "none";
+    nextBtn.disabled = (qIndex === questions.length - 1);
+  } else {
+    prevBtn.style.display = "inline-block";
+    nextBtn.disabled = false;
+    questionNav.style.display = "block";
+
+    // Update nav buttons highlight
+    const navButtons = questionNav.querySelectorAll("button");
+    navButtons.forEach((b, i) => {
+      if (i === qIndex) {
+        b.classList.remove("btn-outline-primary");
+        b.classList.add("btn-primary");
+      } else {
+        b.classList.add("btn-outline-primary");
+        b.classList.remove("btn-primary");
+      }
+    });
+  }
+
+    if (quizState.navigationMode === "free") {
+    updateQuestionNavButtons();
+  }
+
+  document.getElementById("quiz-message").textContent = "";
+}
+
+// ========== Build Question Nav (for Free Mode) ==========
+function buildQuestionNav() {
+  const questionNav = document.getElementById("question-nav");
+  questionNav.innerHTML = "";
+
+  if (quizState.navigationMode !== "free") {
+    questionNav.style.display = "none";
+    return;
+  }
+
+  quizState.questions.forEach((_, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "btn btn-sm btn-outline-primary";
+    btn.textContent = idx + 1;
+    btn.addEventListener("click", () => {
+        quizState.currentIndex = idx;
+        renderCurrentQuestion();
+        if (quizState.timerMode === "per_question") {
+            startPerQuestionTimer();
+        }
+    });
+
+    questionNav.appendChild(btn);
+  });
+
+  updateQuestionNavButtons();
+}
+
+// ========== Finish Quiz (manual or time-up) ==========
+function finishQuiz(auto = false) {
+  const finishBtn = document.getElementById("finish-btn");
+
+  // Prevent double-trigger
+  if (!auto && finishBtn.classList.contains("btn-finish-anim")) {
+    return;
+  }
+
+  // Stop timer
+  clearTimer();
+
+  // Animate button only if user clicked
+  if (!auto) {
+    finishBtn.classList.add("btn-finish-anim");
+    setTimeout(showResults, 900);
+  } else {
+    showResults();
+  }
+}
+
+// ========== Show Quiz Results ==========
+function showResults() {
+  document.getElementById("quiz-area").style.display = "none";
+
+  const questions = quizState.questions;
+  const answers = quizState.answers;
+
+  let correctCount = 0;
+  let detailsHtml = "";
+
+  questions.forEach((q, idx) => {
+    const userIdx = answers[idx];
+    const correctIdx = q.answer_index;
+    const isCorrect = userIdx === correctIdx;
+
+    if (isCorrect) correctCount++;
+
+    const userAnsText = userIdx != null ? q.options[userIdx] : "Not answered";
+    const correctAnsText = q.options[correctIdx];
+
+    detailsHtml += `
+      <div class="mb-3">
+        <div><b>Q${idx + 1}.</b> ${q.question}</div>
+        <div>Your answer: <span class="${isCorrect ? "results-correct" : "results-wrong"}">
+          ${userAnsText}
+        </span></div>
+        <div>Correct answer: <b>${correctAnsText}</b></div>
+        <hr>
+      </div>
+    `;
+  });
+
+  const total = questions.length;
+  const percentage = Math.round((correctCount * 100) / total);
+
+  document.getElementById("results-summary").textContent =
+    `You answered ${correctCount} out of ${total} correctly (${percentage}%).`;
+
+  document.getElementById("results-detail").innerHTML = detailsHtml;
+  document.getElementById("results-area").style.display = "block";
+}
+
+// ========== Wire Navigation Buttons ==========
+function initNavigationButtons() {
+  document.getElementById("prev-btn").addEventListener("click", () => {
+    if (quizState.navigationMode === "sequential") {
+        return; // can't go back
+    }
+    if (quizState.currentIndex > 0) {
+        quizState.currentIndex -= 1;
+        renderCurrentQuestion();
+        if (quizState.timerMode === "per_question") {
+        startPerQuestionTimer();
+        }
+    }
+  });
+
+    document.getElementById("next-btn").addEventListener("click", () => {
+    if (quizState.currentIndex < quizState.questions.length - 1) {
+        quizState.currentIndex += 1;
+        renderCurrentQuestion();
+        if (quizState.timerMode === "per_question") {
+        startPerQuestionTimer();
+        }
+    } else {
+        document.getElementById("quiz-message").textContent =
+        "You are on the last question. You can finish the quiz.";
+    }
+  });
+
+  document.getElementById("finish-btn").addEventListener("click", () => {
+    finishQuiz(false);
+  });
+}
+
+// ========== Quiz Setup Form Submission ==========
+function initQuizSetupForm() {
+  const form = document.getElementById("quiz-setup-form");
+  const statusEl = document.getElementById("setup-status");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    // Gather settings
+    const topic = document.getElementById("topic").value.trim();
+    if (!topic) {
+      alert("Please enter a topic.");
+      return;
+    }
+
+    let numQuestions = parseInt(document.getElementById("num-questions").value, 10);
+    if (isNaN(numQuestions) || numQuestions < 1) numQuestions = 1;
+    if (numQuestions > 20) numQuestions = 20;
+
+    const difficulty = document.getElementById("difficulty").value;
+
+    const navigationMode = document.querySelector('input[name="navigationMode"]:checked').value;
+    const timerMode = document.querySelector('input[name="timerMode"]:checked').value;
+
+    let perQuestionSeconds = 30;
+    let totalTimerMinutes = 5;
+
+    if (timerMode === "per_question") {
+      perQuestionSeconds = parseInt(
+        document.getElementById("per-question-seconds").value,
+        10
+      );
+      if (isNaN(perQuestionSeconds)) perQuestionSeconds = 30;
+    } else {
+      totalTimerMinutes = parseInt(
+        document.getElementById("total-timer-minutes").value,
+        10
+      );
+      if (isNaN(totalTimerMinutes) || totalTimerMinutes < 1) totalTimerMinutes = 1;
+      if (totalTimerMinutes > 60) totalTimerMinutes = 60;
+    }
+
+    // Store settings temporarily
+    pendingSettings = {
+      topic,
+      numQuestions,
+      difficulty,
+      navigationMode,
+      timerMode,
+      perQuestionSeconds,
+      totalTimerMinutes
+    };
+
+    // Fill modal
+    document.getElementById("modal-topic").textContent = topic;
+    document.getElementById("modal-num-questions").textContent = numQuestions;
+    document.getElementById("modal-difficulty").textContent = difficulty;
+    document.getElementById("modal-navigation").textContent =
+      navigationMode === "sequential" ? "Sequential" : "Free Navigation";
+
+    const timerModeText =
+      timerMode === "per_question" ? "Per Question Timer" : "Total Quiz Timer";
+    document.getElementById("modal-timer-mode").textContent = timerModeText;
+
+    const timerValueSpan = document.getElementById("modal-timer-value");
+    if (timerMode === "per_question") {
+      const mins = perQuestionSeconds / 60;
+      if (perQuestionSeconds < 60) {
+        timerValueSpan.textContent = `${perQuestionSeconds} seconds per question`;
+      } else {
+        timerValueSpan.textContent = `${mins} minute(s) per question`;
+      }
+    } else {
+      timerValueSpan.textContent = `${totalTimerMinutes} minute(s) total`;
+    }
+
+    statusEl.textContent = "";
+
+    // Show modal
+    if (startQuizModal) {
+      startQuizModal.show();
+    }
+  });
+}
+
+// ========== Call Backend API to Generate Quiz ==========
+function callGenerateQuizAPI() {
+  if (!pendingSettings) return;
+
+  const statusEl = document.getElementById("setup-status");
+  statusEl.textContent = "Generating questions using AI...";
+
+  const modalStartBtn = document.getElementById("modal-start-btn");
+  modalStartBtn.disabled = true;
+  modalStartBtn.textContent = "Generating...";
+
+  fetch("/quiz/api/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      topic: pendingSettings.topic,
+      num_questions: pendingSettings.numQuestions,
+      difficulty: pendingSettings.difficulty,
+      navigation_mode: pendingSettings.navigationMode,
+      timer_mode: pendingSettings.timerMode,
+      per_question_seconds: pendingSettings.perQuestionSeconds,
+      total_timer_minutes: pendingSettings.totalTimerMinutes
+    })
+  })
+    .then(async (resp) => {
+      const data = await resp.json();
+      if (!resp.ok) {
+        const msg = data.error || "Failed to generate quiz.";
+        alert(msg);
+        statusEl.textContent = msg;
+        return;
+      }
+
+      // Fill quizState from backend response
+      quizState.questions = data.questions || [];
+      quizState.answers = new Array(quizState.questions.length).fill(null);
+      quizState.currentIndex = 0;
+      quizState.navigationMode = data.navigation_mode || pendingSettings.navigationMode;
+      quizState.timerMode = data.timer_mode || pendingSettings.timerMode;
+      quizState.perQuestionSeconds = data.per_question_seconds || pendingSettings.perQuestionSeconds;
+      quizState.totalTimeSeconds = data.total_time_seconds || 0;
+
+      // Hide modal, show quiz area
+      if (startQuizModal) {
+        startQuizModal.hide();
+      }
+
+      // Hide settings, show quiz, clear old results
+      const settingsCard = document.getElementById("settings-card");
+      if (settingsCard) {
+        settingsCard.style.display = "none";
+      }
+      document.getElementById("results-area").style.display = "none";
+      document.getElementById("quiz-area").style.display = "block";
+      document.getElementById("quiz-message").textContent = "";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    // Ensure Finish button is visible (reset previous animation)
+      const finishBtn = document.getElementById("finish-btn");
+      if (finishBtn) {
+        finishBtn.classList.remove("btn-finish-anim");
+      }
+
+
+      // Build nav buttons (if free mode) + first question
+      buildQuestionNav();
+      renderCurrentQuestion();
+
+      // Start appropriate timer
+      if (quizState.timerMode === "total_time") {
+        startTotalTimer();
+      } else {
+        startPerQuestionTimer();
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Error contacting quiz server.");
+      statusEl.textContent = "Error contacting quiz server.";
+    })
+    .finally(() => {
+      modalStartBtn.disabled = false;
+      modalStartBtn.textContent = "Start Now ▶️";
+    });
+}
+
+// ========== Init Modal & Global Listeners ==========
+document.addEventListener("DOMContentLoaded", () => {
+  // Modal
+  const modalEl = document.getElementById("startQuizModal");
+  if (modalEl) {
+    startQuizModal = new bootstrap.Modal(modalEl);
+  }
+
+  // Tooltips
+  initTooltips();
+
+  // Timer mode toggling
+  initTimerModeToggle();
+
+  // Quiz setup form
+  initQuizSetupForm();
+
+  // Navigation buttons
+  initNavigationButtons();
+
+  // Modal "Start Now" button
+  const modalStartBtn = document.getElementById("modal-start-btn");
+  if (modalStartBtn) {
+    modalStartBtn.addEventListener("click", () => {
+      callGenerateQuizAPI();
+    });
+  }
+
+  // "Play Another Quiz" button
+  const playAgainBtn = document.getElementById("play-again-btn");
+  if (playAgainBtn) {
+    playAgainBtn.addEventListener("click", () => {
+      // Animate button
+      playAgainBtn.classList.add("btn-replay-anim");
+      setTimeout(() => {
+        playAgainBtn.classList.remove("btn-replay-anim");
+
+        // Reset state & UI
+        clearTimer();
+        quizState.questions = [];
+        quizState.answers = [];
+        quizState.currentIndex = 0;
+        const finishBtn = document.getElementById("finish-btn");
+        if (finishBtn) {
+          finishBtn.classList.remove("btn-finish-anim");
+        }
+
+
+        document.getElementById("quiz-area").style.display = "none";
+        document.getElementById("results-area").style.display = "none";
+
+        const settingsCard = document.getElementById("settings-card");
+        if (settingsCard) {
+          settingsCard.style.display = "block";
+        }
+
+        document.getElementById("timer").textContent = "";
+        document.getElementById("setup-status").textContent = "";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 900);
+    });
+  }
+});
+
+</script>

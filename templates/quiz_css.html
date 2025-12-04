@@ -1,0 +1,215 @@
+
+<style>
+body {
+  padding-top: 60px;
+  background: #f5f7fb;
+}
+
+.quiz-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Cards */
+.card-custom {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: none;
+}
+
+/* QuizBot logo size */
+.quiz-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+/* Option buttons */
+.option-btn {
+  margin-bottom: 10px;
+  text-align: left;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s ease;
+}
+
+.option-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.option-selected {
+  outline: 3px solid #0d6efd;
+  background: #e9f2ff;
+}
+
+/* Question nav buttons (free mode) */
+#question-nav .btn {
+  margin: 2px;
+}
+
+/* Timer text */
+#timer {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+/* Finish quiz button animation */
+.btn-finish {
+  background-image: linear-gradient(45deg, #0d6efd, #6610f2);
+  color: #fff;
+  border: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background-image 0.3s ease;
+}
+
+.btn-finish:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Applied when user clicks Finish Quiz */
+.btn-finish-anim {
+  animation: spinZoom 1s;
+  background-image: linear-gradient(135deg, #ff7b00, #ff00b3);
+}
+
+@keyframes spinZoom {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(2) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+/* Play Again button */
+.btn-replay {
+  background-image: linear-gradient(45deg, #198754, #50caa6);
+  color: #fff;
+  border: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background-image 0.3s ease;
+}
+
+.btn-replay:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-replay-anim {
+  animation: Zoom 1s;
+  background-image: linear-gradient(135deg, #6bbe8c, #20c261);
+}
+
+@keyframes Zoom {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Results styling */
+.results-correct {
+  color: #198754;
+  font-weight: 600;
+}
+
+.results-wrong {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* Confirmation modal animation: fade + slide + glow */
+.modal-custom .modal-dialog {
+  transform: translateY(30px);
+  opacity: 0;
+  transition: all 0.35s ease-out;
+}
+
+.modal-custom.show .modal-dialog {
+  transform: translateY(0);
+  opacity: 1;
+  box-shadow: 0 0 25px rgba(13, 110, 253, 0.7);
+}
+
+.modal-custom .modal-content {
+  border-radius: 18px;
+  border: 1px solid #0d6efd;
+}
+
+/* Small helpers */
+#setup-status {
+  font-size: 0.95rem;
+}
+
+#quiz-message {
+  font-size: 0.95rem;
+}
+
+/* ===================== MOBILE RESPONSIVE TWEAKS ===================== */
+@media (max-width: 1200px) {
+  /* Heading + logo */
+  .quiz-heading h1 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .quiz-logo {
+    width: 45px;
+    height: 45px;
+  }
+
+  /* Container padding on phone */
+  .quiz-container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  /* Card rounding and padding tighter on small screens */
+  .card-custom {
+    border-radius: 12px;
+    padding: 10px;
+  }
+
+  /* Options slightly smaller text for better fit */
+  #options-container .btn {
+    font-size: 0.9rem;
+  }
+
+  /* Question nav buttons more compact */
+  #question-nav .btn {
+    padding: 4px 6px;
+    font-size: 0.8rem;
+  }
+
+  /* Finish button font size */
+  .btn-finish {
+    font-size: 0.95rem;
+  }
+
+  /* On mobile: Question counter & Timer stacked vertically */
+  #quiz-area .d-flex.justify-content-between.align-items-center {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  /* Bottom button row (Prev / Next / Finish) share width nicely */
+  #quiz-area .d-flex.mt-3 button {
+    flex: 1;
+    margin: 3px;
+  }
+}
+
+</style>
