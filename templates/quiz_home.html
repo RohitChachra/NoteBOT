@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>QuizBot – Play Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuizBot</title>
 
   <!-- Favicon (from /static/IT_NoteBot.png) -->
   <link rel="icon" href="{{ url_for('static', filename='QuizBot_favicon.png') }}" type="image/png">
@@ -26,8 +27,9 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="/">QuizBot</a>
       <div class="d-flex">
+        <button id="dark-mode-toggle" class="btn btn-outline-light me-2" type="button" title="Switch to dark mode">🌙</button>
         <a class="btn btn-outline-light me-2" href="/">Notebot</a>
-        <a class="btn btn-warning active">Quiz Mode</a>
+        <a class="btn btn-warning active me-2">Quiz Mode</a>
       </div>
     </div>
   </nav>
@@ -38,9 +40,9 @@
       <img src="{{ url_for('static', filename='QuizBot_favicon.png') }}" alt="QuizBot Logo" class="quiz-logo">
       <h1 class="m-0">QuizBot</h1>
     </div>
-    <p class="text-center text-muted mb-4">
+    <b><p class="text-center text-muted mb-4">
       Generate topic-wise quizzes using AI, choose difficulty and timer, and get detailed analysis.
-    </p>
+    </p></b>
 
     <!-- ===================== QUIZ SETTINGS CARD ===================== -->
     <div id="settings-card" class="card card-custom mb-4">
@@ -201,7 +203,7 @@
     <!-- ===================== QUIZ PLAY AREA ===================== -->
     <div id="quiz-area" class="card card-custom mb-4" style="display: none;">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="quiz-topbar d-flex justify-content-between align-items-center mb-2">
           <div id="question-counter" class="fw-bold"></div>
           <div id="timer" class="text-danger fw-bold"></div>
         </div>
@@ -213,7 +215,7 @@
         <!-- Question navigation buttons for free mode -->
         <div id="question-nav" class="mb-3" style="display: none;"></div>
 
-        <div class="d-flex justify-content-between">
+        <div class="quiz-actions d-flex justify-content-between mt-3">
           <button id="prev-btn" class="btn btn-outline-secondary">⬅️ Previous</button>
           <button id="next-btn" class="btn btn-outline-secondary">Next ➡️</button>
           <button id="finish-btn" class="btn btn-lg btn-finish">Finish Quiz ✅</button>
@@ -251,5 +253,35 @@
 
   <!-- Custom JS (we'll create quiz_js.html next) -->
     {% include 'quiz_js.html' %}
+
+  <footer class="quiz-footer text-center">
+    <div class="container py-3">
+
+      <!-- Header Line -->
+      <div class="mb-1 fw-semibold">
+        📚 QuizBot – Practice smarter, not harder.
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="small text-muted mb-2">
+        ⚠️ Disclaimer: QuizBot uses AI to generate questions. AI may sometimes make mistakes or fail to generate questions for very broad topics.  
+        <br>If this happens, please try again or choose a more specific topic.
+      </div>
+
+      <!-- Footer links -->
+      <div class="footer-links small mb-1">
+        <a href="https://t.me/+J8zLk2dQb301OGE1" target="_blank">UIET IT Study Material</a> |
+        <a href="https://t.me/ITnotes_bot" target="_blank">IT Notebot</a> |
+        <a href="/quiz">QuizBot</a>
+      </div>
+
+      <!-- Copyright -->
+      <div class="small">
+        © QuizBot 2025 | Created by ~RC~ (UIET CHD)
+      </div>
+
+    </div>
+  </footer>
+
 </body>
 </html>

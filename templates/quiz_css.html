@@ -158,7 +158,7 @@ body {
 }
 
 /* ===================== MOBILE RESPONSIVE TWEAKS ===================== */
-@media (max-width: 1200px) {
+@media (max-width: 768px) {
   /* Heading + logo */
   .quiz-heading h1 {
     font-size: 1.5rem;
@@ -180,6 +180,8 @@ body {
   .card-custom {
     border-radius: 12px;
     padding: 10px;
+    width: 100%;
+    height: 80%;
   }
 
   /* Options slightly smaller text for better fit */
@@ -198,18 +200,98 @@ body {
     font-size: 0.95rem;
   }
 
-  /* On mobile: Question counter & Timer stacked vertically */
-  #quiz-area .d-flex.justify-content-between.align-items-center {
+  /* Top bar: Question counter & Timer stacked vertically */
+  .quiz-topbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
 
-  /* Bottom button row (Prev / Next / Finish) share width nicely */
-  #quiz-area .d-flex.mt-3 button {
-    flex: 1;
-    margin: 3px;
+  /* Bottom button row (Prev / Next / Finish) stacked / full width */
+  .quiz-actions {
+    flex-direction: column;
+    gap: 6px;
   }
+
+  .quiz-actions button {
+    width: 100%;
+  }
+}
+
+/* ===================== DARK MODE ===================== */
+body.dark-mode {
+  background: #050816;
+  color: #e5e7eb;
+}
+
+body.dark-mode .card-custom {
+  background: #111827;
+  color: #e5e7eb;
+  border: 1px solid #374151;
+  box-shadow: none;
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+  background: #020617;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+
+body.dark-mode .form-control::placeholder {
+  color: #9ca3af;
+}
+
+body.dark-mode .btn-outline-secondary {
+  border-color: #9ca3af;
+  color: #e5e7eb;
+}
+
+body.dark-mode #timer {
+  color: #f97316; /* nicer orange for timer */
+}
+
+body.dark-mode .results-wrong {
+  color: #fca5a5;
+}
+
+body.dark-mode .results-correct {
+  color: #6ee7b7;
+}
+
+/* Make muted text readable in dark mode */
+body.dark-mode .text-muted,
+body.dark-mode small,
+body.dark-mode small.text-muted {
+  color: #95def5 !important;   /* light grey */
+}
+
+/* Dark mode – make modal text readable */
+body.dark-mode .modal-custom .modal-body,
+body.dark-mode .modal-custom .modal-body p,
+body.dark-mode .modal-custom .modal-body li {
+  color: #141415 !important;
+}
+
+/* Footer */
+.quiz-footer {
+  margin-top: 30px;
+  background: #f1f5f9;
+  border-top: 2px solid #cad0d7;
+  color: #1f2933;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%
+}
+
+body.dark-mode footer a 
+{ color: #ffc107; text-decoration: none; margin: 0 8px; font-weight: 500; }
+
+/* Footer in dark mode */
+body.dark-mode .quiz-footer {
+  background: #020617;
+  border-top-color: #2d3f66;
+  color: #e5e7eb;
 }
 
 </style>
