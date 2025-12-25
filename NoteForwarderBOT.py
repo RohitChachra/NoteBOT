@@ -247,6 +247,33 @@ file_dict = {
             "Notes": [684, 685],
             "PYQs": [687, 688],
         }
+    },
+    "7th Sem": {
+        "Digital Signal Processing": {
+            "Books": [739, 740, 741, 742],
+            "Notes": [744, 745, 746, 747, 748, 749, 750, 751, 752],
+            "PYQs": [763, 764, 765, 766, 767, 768],
+            "Tutorials":[754, 755, 756, 757, 758],
+            "Assignments": [760, 761],
+            "DSP Lab": [770, 771, 772]
+        },
+        "Agile Software Development": {
+            "Notes": [775, 776, 777],
+            "PYQs": [782, 783, 784, 785, 786, 787, 788],
+            "Assignments": [779, 780],
+        },
+        "Compiler Design": {
+            "Books": [791, 792, 793, 794],
+            "Notes": [796, 797, 798, 799, 800, 801, 802, 803],
+            "PYQs": [820, 821, 822, 823, 824],
+            "Tutorials":[805, 806, 807, 808],
+            "Assignments": [810, 813, 814, 817, 818]
+        },
+        "Internet of Things (IoT)": {
+            "Syllabus": [827, 828],
+            "Notes": [830, 831, 832, 833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844],
+            "PYQs": [846, 847, 848, 849, 850, 851]
+        }
     }
 }
 
@@ -293,7 +320,8 @@ def semester_keyboard():
         [InlineKeyboardButton("📘 IT 3rd Sem", callback_data="sem:3rd Sem")],
         [InlineKeyboardButton("📙 IT 4th Sem", callback_data="sem:4th Sem")],
         [InlineKeyboardButton("📔 IT 5th Sem", callback_data="sem:5th Sem")],
-        [InlineKeyboardButton("📓 IT 6th Sem", callback_data="sem:6th Sem")]
+        [InlineKeyboardButton("📓 IT 6th Sem", callback_data="sem:6th Sem")],
+        [InlineKeyboardButton("📕 IT 7th Sem", callback_data="sem:7th Sem")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
